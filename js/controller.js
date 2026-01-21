@@ -17,15 +17,17 @@ export function pollController(keys) {
   const rtValue = gamepad.buttons[controllerButtonRT]?.value ?? 0;
   if (rtValue > controllerDeadzone) {
     keys.forward = rtValue;
+  } else if (rtValue < controllerDeadzone) {
+    keys.forward = 0;
   }
-  // If below deadzone, don't override keyboard input
 
   // RB (button 6) for brake - analog bumper returns 0-1 value
   const rbValue = gamepad.buttons[controllerButtonRB]?.value ?? 0;
   if (rbValue > controllerDeadzone) {
     keys.brake = rbValue;
+  } else if (rbValue < controllerDeadzone) {
+    keys.brake = 0;
   }
-  // If below deadzone, don't override keyboard input
 
   // Left joystick axis 0 for steering (-1 to +1)
   const axisValue = gamepad.axes[controllerAxisLeftStickX] ?? 0;
@@ -38,6 +40,9 @@ export function pollController(keys) {
     // Steering right
     keys.right = axisValue;
     keys.left = 0;
+  } else {
+    // In deadzone - clear both steering directions
+    keys.left = 0;
+    keys.right = 0;
   }
-  // If in deadzone, don't override keyboard input
 }
