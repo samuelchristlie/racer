@@ -1,9 +1,13 @@
 import * as THREE from "three";
 import { GAME_CONFIG } from "./config.js";
+import { createRoadTexture } from "./textures.js";
 
 // Create the oval track
 export function createTrack() {
   const trackGroup = new THREE.Group();
+
+  // Create procedural road texture for sense of speed (subtle grain on top of original color)
+  const roadTexture = createRoadTexture(GAME_CONFIG.trackColor, 512, 512);
 
   // Straight sections
   const straightGeometry = new THREE.PlaneGeometry(
@@ -11,7 +15,9 @@ export function createTrack() {
     GAME_CONFIG.trackWidth,
   );
   const trackMaterial = new THREE.MeshStandardMaterial({
-    color: GAME_CONFIG.trackColor,
+    map: roadTexture,
+    roughness: 0.8,
+    metalness: 0.0,
   });
 
   const straight1 = new THREE.Mesh(straightGeometry, trackMaterial);
@@ -23,7 +29,7 @@ export function createTrack() {
   );
   trackGroup.add(straight1);
 
-  const straight2 = new THREE.Mesh(straightGeometry, trackMaterial);
+  const straight2 = new THREE.Mesh(straightGeometry, trackMaterial.clone());
   straight2.rotation.x = -Math.PI / 2;
   straight2.position.set(
     0,
@@ -42,8 +48,10 @@ export function createTrack() {
     Math.PI,
   );
   const curveMaterial = new THREE.MeshStandardMaterial({
-    color: GAME_CONFIG.trackColor,
+    map: roadTexture,
     side: THREE.DoubleSide,
+    roughness: 0.8,
+    metalness: 0.0,
   });
 
   const curve1 = new THREE.Mesh(curveGeometry, curveMaterial);
@@ -52,7 +60,7 @@ export function createTrack() {
   curve1.position.set(GAME_CONFIG.trackLength / 2, 0.01, 0);
   trackGroup.add(curve1);
 
-  const curve2 = new THREE.Mesh(curveGeometry, curveMaterial);
+  const curve2 = new THREE.Mesh(curveGeometry, curveMaterial.clone());
   curve2.rotation.x = -Math.PI / 2;
   curve2.rotation.z = Math.PI / 2;
   curve2.position.set(-GAME_CONFIG.trackLength / 2, 0.01, 0);

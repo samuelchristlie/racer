@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GAME_CONFIG } from "./config.js";
+import { createGrassTexture } from "./textures.js";
 
 // Create scene, camera, and renderer
 export function createScene() {
@@ -53,13 +54,16 @@ export function createScene() {
   directionalLight.shadow.camera.bottom = GAME_CONFIG.shadowCameraBottom;
   scene.add(directionalLight);
 
-  // Ground
+  // Ground with procedural grass texture for sense of speed
+  const grassTexture = createGrassTexture(GAME_CONFIG.groundColor, 512, 512);
   const groundGeometry = new THREE.PlaneGeometry(
     GAME_CONFIG.groundSize,
     GAME_CONFIG.groundSize,
   );
   const groundMaterial = new THREE.MeshStandardMaterial({
-    color: GAME_CONFIG.groundColor,
+    map: grassTexture,
+    roughness: 1.0,
+    metalness: 0.0,
   });
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI / 2;

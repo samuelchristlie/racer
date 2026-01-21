@@ -71,7 +71,7 @@ export const GAME_CONFIG = {
   fogNear: 100,
   fogFar: 500, // Increased for larger track visibility
   groundSize: 1200, // Increased for larger track
-  groundColor: 0x3d9140,
+  groundColor: 0x1a4d1a, // Dark, saturated green grass
 
   // Camera
   cameraFOV: 75,
@@ -97,7 +97,7 @@ export const GAME_CONFIG = {
   trackWidth: 22.5,
   trackLength: 500, // m (2.5x scale for realistic F1 speeds)
   trackCurveRadius: 150, // m (2.5x scale for high-speed cornering)
-  trackColor: 0x333333,
+  trackColor: 0x1a1a1a, // Very dark asphalt
   curveSegments: 32,
   finishLineColor: 0xffffff,
   checkColor: 0x000000,
