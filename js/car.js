@@ -12,58 +12,69 @@ export function createCar() {
     roughness: GAME_CONFIG.carBodyRoughness,
   });
 
-  // Nose cone
-  const noseGeometry = new THREE.BoxGeometry(0.8, 0.3, 1.5);
+  // Nose cone - Narrower and slightly thinner
+  const noseGeometry = new THREE.BoxGeometry(0.5, 0.25, 1.5);
   const nose = new THREE.Mesh(noseGeometry, bodyMaterial);
   nose.position.set(0, 0.35, 2.2);
   nose.castShadow = true;
   car.add(nose);
 
-  // Main body
-  const bodyGeometry = new THREE.BoxGeometry(1.4, 0.5, 3);
+  // Main body - Narrower (was 1.4) and Thinner (was 0.5)
+  const bodyGeometry = new THREE.BoxGeometry(0.85, 0.4, 3);
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
   body.position.set(0, 0.45, 0);
   body.castShadow = true;
   car.add(body);
 
-  // Cockpit opening (driver position)
-  const cockpitGeometry = new THREE.BoxGeometry(0.7, 0.3, 1);
+  // Cockpit opening (driver position) - Adjusted for narrower body
+  const cockpitGeometry = new THREE.BoxGeometry(0.5, 0.3, 1);
   const cockpitMaterial = new THREE.MeshStandardMaterial({
     color: 0x111111,
     metalness: 0.3,
     roughness: 0.8,
   });
   const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
-  cockpit.position.set(0, 0.8, 0);
+  cockpit.position.set(0, 0.75, 0); // Lowered slightly
   car.add(cockpit);
 
-  // Engine cover behind cockpit
-  const engineCoverGeometry = new THREE.BoxGeometry(1.2, 0.6, 1.5);
+  // Engine cover behind cockpit - Narrower (was 1.2)
+  const engineCoverGeometry = new THREE.BoxGeometry(0.65, 0.6, 1.5);
   const engineCover = new THREE.Mesh(engineCoverGeometry, bodyMaterial);
   engineCover.position.set(0, 0.65, -1.2);
   engineCover.castShadow = true;
   car.add(engineCover);
 
-  // Side pods (cooling intakes)
-  const sidePodGeometry = new THREE.BoxGeometry(0.6, 0.4, 1.8);
-  const sidePodMaterial = new THREE.MeshStandardMaterial({
-    color: 0x222222,
-    metalness: 0.4,
-    roughness: 0.6,
-  });
+  // Side Pods - Simple Box Geometry (Replaces complex mesh to fix face issues)
+  const sidePodGeometry = new THREE.BoxGeometry(0.35, 0.35, 1.8);
 
-  const leftSidePod = new THREE.Mesh(sidePodGeometry, sidePodMaterial);
-  leftSidePod.position.set(-1, 0.4, 0);
+  const leftSidePod = new THREE.Mesh(sidePodGeometry, bodyMaterial);
+  // Positioned at side
+  leftSidePod.position.set(-0.55, 0.25, 0);
   leftSidePod.castShadow = true;
   car.add(leftSidePod);
 
-  const rightSidePod = new THREE.Mesh(sidePodGeometry, sidePodMaterial);
-  rightSidePod.position.set(1, 0.4, 0);
+  const rightSidePod = new THREE.Mesh(sidePodGeometry, bodyMaterial);
+  // Positioned at side
+  rightSidePod.position.set(0.55, 0.25, 0);
   rightSidePod.castShadow = true;
   car.add(rightSidePod);
 
-  // Front wing
-  const frontWingGeometry = new THREE.BoxGeometry(2.5, 0.08, 0.4);
+  // Floor (Undertray) - Joined, thin, and black
+  const floorGeometry = new THREE.BoxGeometry(1.4, 0.05, 2.5);
+  const floorMaterial = new THREE.MeshStandardMaterial({
+    color: 0x111111, // Carbon black
+    metalness: 0.2,
+    roughness: 0.8,
+  });
+
+  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+  // Positioned low (y=0.22) to sit just below the main body
+  floor.position.set(0, 0.22, 0);
+  floor.castShadow = true;
+  car.add(floor);
+
+  // Front wing - Thinner (height reduced from 0.08 to 0.03)
+  const frontWingGeometry = new THREE.BoxGeometry(2.5, 0.03, 0.4);
   const wingMaterial = new THREE.MeshStandardMaterial({
     color: 0x111111,
     metalness: 0.5,
@@ -75,7 +86,7 @@ export function createCar() {
   car.add(frontWing);
 
   // Front wing end plates
-  const endPlateGeometry = new THREE.BoxGeometry(0.08, 0.25, 0.4);
+  const endPlateGeometry = new THREE.BoxGeometry(0.04, 0.25, 0.4);
   const leftEndPlate = new THREE.Mesh(endPlateGeometry, wingMaterial);
   leftEndPlate.position.set(-1.25, 0.23, 3);
   car.add(leftEndPlate);
@@ -84,42 +95,54 @@ export function createCar() {
   rightEndPlate.position.set(1.25, 0.23, 3);
   car.add(rightEndPlate);
 
-  // Rear wing
-  const rearWingGeometry = new THREE.BoxGeometry(2.2, 0.08, 0.5);
+  // Rear wing - Narrower width (2.2 -> 1.6) and thinner height
+  const rearWingGeometry = new THREE.BoxGeometry(1.6, 0.04, 0.5);
   const rearWing = new THREE.Mesh(rearWingGeometry, wingMaterial);
   rearWing.position.set(0, 1.2, -2.2);
   rearWing.castShadow = true;
   car.add(rearWing);
 
-  // Rear wing end plates (larger)
-  const rearEndPlateGeometry = new THREE.BoxGeometry(0.1, 0.6, 0.4);
+  // Rear wing end plates - Moved inward to match new wing width
+  const rearEndPlateGeometry = new THREE.BoxGeometry(0.05, 0.6, 0.4);
   const leftRearEndPlate = new THREE.Mesh(rearEndPlateGeometry, wingMaterial);
-  leftRearEndPlate.position.set(-1.1, 1.1, -2.2);
+  leftRearEndPlate.position.set(-0.8, 1.1, -2.2); // Adjusted x from -1.1 to -0.8
   car.add(leftRearEndPlate);
 
   const rightRearEndPlate = new THREE.Mesh(rearEndPlateGeometry, wingMaterial);
-  rightRearEndPlate.position.set(1.1, 1.1, -2.2);
+  rightRearEndPlate.position.set(0.8, 1.1, -2.2); // Adjusted x from 1.1 to 0.8
   car.add(rightRearEndPlate);
 
+  // Rear diffuser - Black box slightly smaller than engine cover, positioned behind it
+  const diffuserGeometry = new THREE.BoxGeometry(0.6, 0.5, 0.4); // Much taller and slightly smaller than engine cover
+  const diffuserMaterial = new THREE.MeshStandardMaterial({
+    color: 0x111111, // Black
+    metalness: 0.1,
+    roughness: 0.8,
+  });
+  const diffuser = new THREE.Mesh(diffuserGeometry, diffuserMaterial);
+  diffuser.position.set(0, 0.55, -1.95); // Positioned directly behind the engine cover, adjusted height
+  diffuser.castShadow = true;
+  car.add(diffuser);
+
   // Rear wing supports
-  const supportGeometry = new THREE.BoxGeometry(0.08, 0.6, 0.08);
+  const supportGeometry = new THREE.BoxGeometry(0.05, 0.6, 0.08);
   const leftSupport = new THREE.Mesh(supportGeometry, wingMaterial);
-  leftSupport.position.set(-0.8, 0.85, -2.2);
+  leftSupport.position.set(-0.3, 0.85, -2.2); // Adjusted closer to center
   car.add(leftSupport);
 
   const rightSupport = new THREE.Mesh(supportGeometry, wingMaterial);
-  rightSupport.position.set(0.8, 0.85, -2.2);
+  rightSupport.position.set(0.3, 0.85, -2.2); // Adjusted closer to center
   car.add(rightSupport);
 
   // Halo (safety device)
-  const haloGeometry = new THREE.TorusGeometry(0.4, 0.04, 8, 16, Math.PI);
+  const haloGeometry = new THREE.TorusGeometry(0.35, 0.04, 8, 16, Math.PI);
   const haloMaterial = new THREE.MeshStandardMaterial({
     color: 0x333333,
     metalness: 0.8,
     roughness: 0.2,
   });
   const halo = new THREE.Mesh(haloGeometry, haloMaterial);
-  halo.position.set(0, 0.9, 0.3);
+  halo.position.set(0, 0.85, 0.3);
   halo.rotation.x = Math.PI / 2;
   halo.rotation.z = Math.PI;
   car.add(halo);
@@ -136,7 +159,7 @@ export function createCar() {
     roughness: 0.9,
   });
 
-  // Front wheels (smaller)
+  // Front wheels (smaller) - SIZE KEPT SAME
   const frontWheelGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.35, 24);
   const frontWheelPositions = [
     { x: -0.9, z: 1.8 },
@@ -164,11 +187,11 @@ export function createCar() {
     car.add(rim);
   });
 
-  // Rear wheels (larger - F1 characteristic)
+  // Rear wheels (larger - F1 characteristic) - Moved inward
   const rearWheelGeometry = new THREE.CylinderGeometry(0.42, 0.42, 0.45, 24);
   const rearWheelPositions = [
-    { x: -1.5, z: -1.3 },
-    { x: 1.5, z: -1.3 },
+    { x: -1.0, z: -1.3 }, // Adjusted x from -1.5 to -1.0
+    { x: 1.0, z: -1.3 }, // Adjusted x from 1.5 to 1.0
   ];
 
   rearWheelPositions.forEach((pos) => {
@@ -193,20 +216,20 @@ export function createCar() {
   });
 
   // Camera pod on top (F1 TV camera)
-  const cameraPodGeometry = new THREE.BoxGeometry(0.15, 0.1, 0.15);
+  const cameraPodGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.15);
   const cameraPod = new THREE.Mesh(cameraPodGeometry, wingMaterial);
-  cameraPod.position.set(0, 1.35, -0.3);
+  cameraPod.position.set(0, 1.25, -0.3);
   car.add(cameraPod);
 
   // Number on the body (simple colored box)
-  const numberPlateGeometry = new THREE.BoxGeometry(0.4, 0.25, 0.05);
+  const numberPlateGeometry = new THREE.BoxGeometry(0.3, 0.25, 0.05);
   const numberPlateMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     metalness: 0.1,
     roughness: 0.5,
   });
   const numberPlate = new THREE.Mesh(numberPlateGeometry, numberPlateMaterial);
-  numberPlate.position.set(0, 0.75, 0.76);
+  numberPlate.position.set(0, 0.7, 0.76);
   car.add(numberPlate);
 
   return car;
@@ -265,14 +288,18 @@ export function updateCar(car, gameState, keys, deltaTime) {
     const engineForce = GAME_CONFIG.engineForce * keys.forward; // N
     appliedForces.engine = engineForce;
     const engineAcceleration = engineForce / carMass; // m/s²
-    const accelerationVec = facingDir.clone().multiplyScalar(engineAcceleration * deltaTime);
+    const accelerationVec = facingDir
+      .clone()
+      .multiplyScalar(engineAcceleration * deltaTime);
     velocity.add(accelerationVec);
   } else if (keys.backward > 0) {
     // Reverse with half the force
     const engineForce = -GAME_CONFIG.engineForce * 0.5 * keys.backward; // N
     appliedForces.engine = engineForce;
     const engineAcceleration = engineForce / carMass; // m/s²
-    const accelerationVec = facingDir.clone().multiplyScalar(engineAcceleration * deltaTime);
+    const accelerationVec = facingDir
+      .clone()
+      .multiplyScalar(engineAcceleration * deltaTime);
     velocity.add(accelerationVec);
   }
 
@@ -292,7 +319,9 @@ export function updateCar(car, gameState, keys, deltaTime) {
     const frictionCoeff = GAME_CONFIG.friction; // per-second coefficient
     const frictionDeceleration = frictionCoeff * 9.81; // m/s² (using g = 9.81 m/s²)
     appliedForces.friction = frictionDeceleration * carMass;
-    const frictionVec = velocity.clone().multiplyScalar(-frictionDeceleration * deltaTime);
+    const frictionVec = velocity
+      .clone()
+      .multiplyScalar(-frictionDeceleration * deltaTime);
     velocity.add(frictionVec);
   }
 
