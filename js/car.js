@@ -213,7 +213,8 @@ export function createCar() {
 }
 
 // Calculate car physics state (separated from state mutation for reuse)
-function calculateCarPhysics(car, keys, gameState) {
+// All values in SI units: meters, m/s, m/s², kg, N
+function calculateCarPhysics(car, keys, gameState, appliedForces) {
   const { velocity } = gameState;
 
   // Calculate car's facing direction
@@ -225,8 +226,8 @@ function calculateCarPhysics(car, keys, gameState) {
 
   // Clone velocity for calculation (don't modify state yet)
   const calculatedVelocity = velocity.clone();
-  const speed = calculatedVelocity.length();
-  const isMoving = speed > 0.0001;
+  const speed = calculatedVelocity.length(); // m/s
+  const isMoving = speed > 0.01;
 
   // Return physics state object
   return {
@@ -234,12 +235,15 @@ function calculateCarPhysics(car, keys, gameState) {
     speed: speed,
     facingDirection: facingDir,
     isMoving: isMoving,
+    forces: appliedForces,
   };
 }
 
-// Update car physics and state
-export function updateCar(car, gameState, keys) {
+// Update car physics and state (SI units: meters, m/s, m/s², kg, N)
+// deltaTime: time in seconds since last frame (for frame-independent physics)
+export function updateCar(car, gameState, keys, deltaTime) {
   const { velocity } = gameState;
+  const carMass = GAME_CONFIG.carMass; // kg
 
   // Calculate car's facing direction
   const facingDir = new THREE.Vector3(
@@ -248,67 +252,96 @@ export function updateCar(car, gameState, keys) {
     Math.cos(car.rotation.y),
   );
 
-  // Apply input force (multiply by analog value 0-1)
+  // Track applied forces for debug display (in newtons)
+  const appliedForces = {
+    engine: 0,
+    brake: 0,
+    drag: 0,
+    friction: 0,
+  };
+
+  // Apply engine force using F = ma → a = F/m
   if (keys.forward > 0) {
-    const acceleration = facingDir.clone().multiplyScalar(gameState.acceleration * keys.forward);
-    velocity.add(acceleration);
+    const engineForce = GAME_CONFIG.engineForce * keys.forward; // N
+    appliedForces.engine = engineForce;
+    const engineAcceleration = engineForce / carMass; // m/s²
+    const accelerationVec = facingDir.clone().multiplyScalar(engineAcceleration * deltaTime);
+    velocity.add(accelerationVec);
   } else if (keys.backward > 0) {
-    const acceleration = facingDir.clone().multiplyScalar(-gameState.acceleration * 0.5 * keys.backward);
-    velocity.add(acceleration);
+    // Reverse with half the force
+    const engineForce = -GAME_CONFIG.engineForce * 0.5 * keys.backward; // N
+    appliedForces.engine = engineForce;
+    const engineAcceleration = engineForce / carMass; // m/s²
+    const accelerationVec = facingDir.clone().multiplyScalar(engineAcceleration * deltaTime);
+    velocity.add(accelerationVec);
   }
 
-  // Apply braking (force opposite to velocity)
+  // Apply braking force (opposite to velocity direction)
   if (keys.brake > 0 && velocity.lengthSq() > 0.0001) {
     const brakeDir = velocity.clone().normalize();
-    const brakeForce = brakeDir.multiplyScalar(-gameState.brakeForce * keys.brake);
-    velocity.add(brakeForce);
+    const brakeForce = GAME_CONFIG.brakeForce * keys.brake; // N
+    appliedForces.brake = brakeForce;
+    const brakeAcceleration = brakeForce / carMass; // m/s²
+    const brakeVec = brakeDir.multiplyScalar(-brakeAcceleration * deltaTime);
+    velocity.add(brakeVec);
   }
 
-  // Apply friction when coasting
+  // Apply rolling resistance (friction) when coasting
   if (keys.forward <= 0 && keys.backward <= 0 && keys.brake <= 0) {
-    const friction = velocity.clone().multiplyScalar(-GAME_CONFIG.friction);
-    velocity.add(friction);
+    // Rolling resistance: F = µ · m · g (simplified as fraction per second)
+    const frictionCoeff = GAME_CONFIG.friction; // per-second coefficient
+    const frictionDeceleration = frictionCoeff * 9.81; // m/s² (using g = 9.81 m/s²)
+    appliedForces.friction = frictionDeceleration * carMass;
+    const frictionVec = velocity.clone().multiplyScalar(-frictionDeceleration * deltaTime);
+    velocity.add(frictionVec);
   }
 
-  // Apply air resistance (scales with speed squared)
-  const speed = velocity.length();
-  if (speed > 0.001) {
-    const airResistance = velocity
-      .clone()
-      .normalize()
-      .multiplyScalar(-GAME_CONFIG.airResistance * speed * speed);
-    velocity.add(airResistance);
+  // Apply aerodynamic drag: F = 0.5 · ρ · Cd · A · v²
+  // Simplified: F = dragCoefficient · v²
+  const speed = velocity.length(); // m/s
+  if (speed > 0.01) {
+    const dragForce = GAME_CONFIG.dragCoefficient * speed * speed; // N
+    appliedForces.drag = dragForce;
+    const dragAcceleration = dragForce / carMass; // m/s²
+    const dragDir = velocity.clone().normalize();
+    const dragVec = dragDir.multiplyScalar(-dragAcceleration * deltaTime);
+    velocity.add(dragVec);
   }
 
   // Clamp velocity to max speed
-  velocity.clampLength(0, gameState.maxSpeed);
+  velocity.clampLength(0, GAME_CONFIG.maxSpeed);
 
-  // Apply grip correction (blend velocity toward facing direction)
+  // Apply grip correction (blend velocity toward facing direction for cornering)
+  // This simulates tire grip - higher value = tighter cornering
   if (velocity.lengthSq() > 0.0001) {
     const currentSpeed = velocity.length();
     const desiredVelocity = facingDir.clone().multiplyScalar(currentSpeed);
-    velocity.lerp(desiredVelocity, GAME_CONFIG.gripFactor);
+    // Grip factor is per-second, scale by deltaTime
+    const gripFactor = 1 - Math.pow(1 - GAME_CONFIG.gripFactor, deltaTime);
+    velocity.lerp(desiredVelocity, gripFactor);
   }
 
-  // Update car rotation (only when moving)
-  if (speed > 0.01) {
+  // Update car rotation (only when moving) - turn speed is in rad/s
+  if (speed > 0.1) {
     const turnMultiplier = velocity.dot(facingDir) > 0 ? 1 : -1;
+    const turnAmount = GAME_CONFIG.turnSpeed * deltaTime; // radians
     if (keys.left > 0) {
-      car.rotation.y += gameState.turnSpeed * keys.left * turnMultiplier;
+      car.rotation.y += turnAmount * keys.left * turnMultiplier;
     }
     if (keys.right > 0) {
-      car.rotation.y -= gameState.turnSpeed * keys.right * turnMultiplier;
+      car.rotation.y -= turnAmount * keys.right * turnMultiplier;
     }
   }
 
   // Stop very small velocities
-  if (velocity.lengthSq() < 0.000001) {
+  if (velocity.lengthSq() < 0.0001) {
     velocity.set(0, 0, 0);
   }
 
-  // Move car
-  car.position.add(velocity);
+  // Move car (position += velocity * deltaTime)
+  const displacement = velocity.clone().multiplyScalar(deltaTime);
+  car.position.add(displacement);
 
   // Return physics state for debug visualization
-  return calculateCarPhysics(car, keys, gameState);
+  return calculateCarPhysics(car, keys, gameState, appliedForces);
 }

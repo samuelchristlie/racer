@@ -7,11 +7,11 @@ import { createCar, updateCar } from "./car.js";
 import { updateCamera } from "./camera.js";
 import { setupInput, setupDebugToggle } from "./input.js";
 import { pollController } from "./controller.js";
-import { createUI, updateUI, updateInputGauge, updateSteeringGauge } from "./ui.js";
+import { createUI, updateUI, updateInputGauge, updateSteeringGauge, createDebugInfo, updateDebugInfo } from "./ui.js";
 import { createDebugArrows, updateDebugArrows, setDebugMode } from "./debug.js";
 
 // Initialize scene, camera, and renderer
-const { scene, camera, renderer } = createScene();
+const { scene, camera, renderer, clock } = createScene();
 
 // Create and add track to scene
 const track = createTrack();
@@ -33,17 +33,22 @@ setupDebugToggle(() => {
 // Create debug arrows
 createDebugArrows(scene);
 
-// Create UI references
+// Create UI references and debug overlay
 const ui = createUI();
+createDebugInfo();
 
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
 
+  // Get delta time in seconds for frame-independent physics
+  const deltaTime = Math.min(clock.getDelta(), 0.1); // Cap at 0.1s to prevent huge jumps
+
   pollController(keys, gameState);
-  const physics = updateCar(car, gameState, keys);
-  updateCamera(camera, car, gameState);
+  const physics = updateCar(car, gameState, keys, deltaTime);
+  updateCamera(camera, car, gameState, deltaTime);
   updateUI(gameState, car, ui);
+  updateDebugInfo(gameState, car, physics, ui);
   updateInputGauge(keys, ui);
   updateSteeringGauge(keys, ui);
   updateDebugArrows(car, physics, keys);

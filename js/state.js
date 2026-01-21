@@ -1,14 +1,14 @@
 import * as THREE from "three";
 import { GAME_CONFIG } from "./config.js";
 
-// Game state
+// Game state (SI units: meters, m/s, m/s², kg, N)
 export const gameState = {
-  velocity: new THREE.Vector3(0, 0, 0),
-  maxSpeed: GAME_CONFIG.maxSpeed,
-  acceleration: GAME_CONFIG.acceleration,
-  deceleration: GAME_CONFIG.deceleration,
-  brakeForce: GAME_CONFIG.brakeForce,
-  turnSpeed: GAME_CONFIG.turnSpeed,
+  velocity: new THREE.Vector3(0, 0, 0), // m/s
+  maxSpeed: GAME_CONFIG.maxSpeed, // m/s
+  engineForce: GAME_CONFIG.engineForce, // N
+  brakeForce: GAME_CONFIG.brakeForce, // N
+  turnSpeed: GAME_CONFIG.turnSpeed, // rad/s
+  carMass: GAME_CONFIG.carMass, // kg
   currentLap: 1,
   totalLaps: GAME_CONFIG.totalLaps,
   checkpoint: 0,

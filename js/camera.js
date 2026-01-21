@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { GAME_CONFIG } from "./config.js";
 
 // Update camera to follow the car
-export function updateCamera(camera, car, gameState) {
+// deltaTime: time in seconds since last frame (for frame-independent behavior)
+export function updateCamera(camera, car, gameState, deltaTime) {
   // Calculate total rotation (car rotation + camera offset)
   const totalRotation = car.rotation.y + gameState.cameraRotation;
 

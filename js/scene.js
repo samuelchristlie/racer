@@ -27,6 +27,9 @@ export function createScene() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   document.body.appendChild(renderer.domElement);
 
+  // Clock for delta time calculation (frame-independent physics)
+  const clock = new THREE.Clock();
+
   // Lighting
   const ambientLight = new THREE.AmbientLight(
     0xffffff,
@@ -63,5 +66,5 @@ export function createScene() {
   ground.receiveShadow = true;
   scene.add(ground);
 
-  return { scene, camera, renderer };
+  return { scene, camera, renderer, clock };
 }

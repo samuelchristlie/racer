@@ -8,16 +8,71 @@ export function createUI() {
     throttleFill: document.getElementById("throttleFill"),
     brakeFill: document.getElementById("brakeFill"),
     steeringFill: document.getElementById("steeringFill"),
+    debugElement: document.getElementById("debug-info"),
   };
+}
+
+// Create debug info element (called if not already in HTML)
+export function createDebugInfo() {
+  let debugElement = document.getElementById("debug-info");
+  if (!debugElement) {
+    debugElement = document.createElement("div");
+    debugElement.id = "debug-info";
+    debugElement.style.cssText = `
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-family: monospace;
+      font-size: 14px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      pointer-events: none;
+      display: none;
+    `;
+    document.body.appendChild(debugElement);
+  }
+  return debugElement;
+}
+
+// Update debug info overlay (SI units: m/s, m, rad, kg, N)
+export function updateDebugInfo(gameState, car, physics, ui) {
+  const { debugElement } = ui;
+  if (!debugElement) return;
+
+  // Only show when debug mode is active
+  if (!gameState.debugMode) {
+    debugElement.style.display = "none";
+    return;
+  }
+
+  debugElement.style.display = "block";
+
+  const speedMs = physics.speed; // m/s
+  const speedKmh = speedMs * 3.6; // km/h
+  const pos = car.position;
+  const heading = car.rotation.y % (2 * Math.PI);
+
+  debugElement.innerHTML = `
+    DEBUG MODE<br>
+    Velocity: ${speedMs.toFixed(1)} m/s (${speedKmh.toFixed(1)} km/h)<br>
+    Heading: ${heading.toFixed(2)} rad<br>
+    Position: (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)}) m<br>
+    Mass: ${GAME_CONFIG.carMass} kg<br>
+    Engine Force: ${physics.forces.engine.toFixed(0)} N<br>
+    Brake Force: ${physics.forces.brake.toFixed(0)} N<br>
+    Drag Force: ${physics.forces.drag.toFixed(0)} N<br>
+    Friction Force: ${physics.forces.friction.toFixed(0)} N
+  `;
 }
 
 // Update UI elements (speed and lap counter)
 export function updateUI(gameState, car, ui) {
   const { speedElement, lapElement } = ui;
 
-  // Update speed display
-  const displaySpeed = Math.abs(Math.round(gameState.velocity.length() * 100));
-  speedElement.textContent = `${displaySpeed} km/h`;
+  // Update speed display (convert SI m/s to km/h)
+  const speedMs = gameState.velocity.length(); // m/s
+  const speedKmh = speedMs * 3.6; // km/h
+  speedElement.textContent = `${Math.round(speedKmh)} km/h`;
 
   // Lap counting (simple checkpoint system)
   const distFromStart = Math.sqrt(
