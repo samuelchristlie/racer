@@ -7,6 +7,7 @@ export function createUI() {
     lapElement: document.getElementById("lap"),
     throttleFill: document.getElementById("throttleFill"),
     brakeFill: document.getElementById("brakeFill"),
+    steeringFill: document.getElementById("steeringFill"),
   };
 }
 
@@ -15,7 +16,7 @@ export function updateUI(gameState, car, ui) {
   const { speedElement, lapElement } = ui;
 
   // Update speed display
-  const displaySpeed = Math.abs(Math.round(gameState.speed * 100));
+  const displaySpeed = Math.abs(Math.round(gameState.velocity.length() * 100));
   speedElement.textContent = `${displaySpeed} km/h`;
 
   // Lap counting (simple checkpoint system)
@@ -71,4 +72,26 @@ export function updateInputGauge(keys, ui) {
   // For keyboard, brake is either 0% or 100%
   const brakeLevel = (keys.brake || keys.backward) ? 100 : 0;
   brakeFill.style.width = `${brakeLevel}%`;
+}
+
+// Update steering gauge display (left and right)
+export function updateSteeringGauge(keys, ui) {
+  const { steeringFill } = ui;
+
+  // Steering fills from center line outward to the edges
+  // Only one direction should be active at a time (both pressed = neutral)
+  if (keys.left && !keys.right) {
+    // Steering left: fill from center to left edge
+    steeringFill.style.left = "auto";
+    steeringFill.style.right = "50%";
+    steeringFill.style.width = "50%";
+  } else if (keys.right && !keys.left) {
+    // Steering right: fill from center to right edge
+    steeringFill.style.left = "50%";
+    steeringFill.style.right = "auto";
+    steeringFill.style.width = "50%";
+  } else {
+    // Neutral: both pressed or neither pressed
+    steeringFill.style.width = "0%";
+  }
 }

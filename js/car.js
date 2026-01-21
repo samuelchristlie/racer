@@ -214,38 +214,60 @@ export function createCar() {
 
 // Update car physics and state
 export function updateCar(car, gameState, keys) {
-  // Acceleration/Deceleration
+  const { velocity } = gameState;
+
+  // Calculate car's facing direction
+  const facingDir = new THREE.Vector3(
+    Math.sin(car.rotation.y),
+    0,
+    Math.cos(car.rotation.y),
+  );
+
+  // Apply input force
   if (keys.forward) {
-    gameState.speed = Math.min(
-      gameState.speed + gameState.acceleration,
-      gameState.maxSpeed,
-    );
+    const acceleration = facingDir.clone().multiplyScalar(gameState.acceleration);
+    velocity.add(acceleration);
   } else if (keys.backward) {
-    gameState.speed = Math.max(
-      gameState.speed - gameState.acceleration,
-      -gameState.maxSpeed / 2,
-    );
-  } else {
-    // Natural deceleration
-    if (gameState.speed > 0) {
-      gameState.speed = Math.max(0, gameState.speed - gameState.deceleration);
-    } else if (gameState.speed < 0) {
-      gameState.speed = Math.min(0, gameState.speed + gameState.deceleration);
-    }
+    const acceleration = facingDir.clone().multiplyScalar(-gameState.acceleration * 0.5);
+    velocity.add(acceleration);
   }
 
-  // Braking
-  if (keys.brake) {
-    if (gameState.speed > 0) {
-      gameState.speed = Math.max(0, gameState.speed - gameState.brakeForce);
-    } else if (gameState.speed < 0) {
-      gameState.speed = Math.min(0, gameState.speed + gameState.brakeForce);
-    }
+  // Apply braking (force opposite to velocity)
+  if (keys.brake && velocity.lengthSq() > 0.0001) {
+    const brakeDir = velocity.clone().normalize();
+    const brakeForce = brakeDir.multiplyScalar(-gameState.brakeForce);
+    velocity.add(brakeForce);
   }
 
-  // Turning (only when moving)
-  if (Math.abs(gameState.speed) > 0.01) {
-    const turnMultiplier = gameState.speed > 0 ? 1 : -1;
+  // Apply friction when coasting
+  if (!keys.forward && !keys.backward && !keys.brake) {
+    const friction = velocity.clone().multiplyScalar(-GAME_CONFIG.friction);
+    velocity.add(friction);
+  }
+
+  // Apply air resistance (scales with speed squared)
+  const speed = velocity.length();
+  if (speed > 0.001) {
+    const airResistance = velocity
+      .clone()
+      .normalize()
+      .multiplyScalar(-GAME_CONFIG.airResistance * speed * speed);
+    velocity.add(airResistance);
+  }
+
+  // Clamp velocity to max speed
+  velocity.clampLength(0, gameState.maxSpeed);
+
+  // Apply grip correction (blend velocity toward facing direction)
+  if (velocity.lengthSq() > 0.0001) {
+    const currentSpeed = velocity.length();
+    const desiredVelocity = facingDir.clone().multiplyScalar(currentSpeed);
+    velocity.lerp(desiredVelocity, GAME_CONFIG.gripFactor);
+  }
+
+  // Update car rotation (only when moving)
+  if (speed > 0.01) {
+    const turnMultiplier = velocity.dot(facingDir) > 0 ? 1 : -1;
     if (keys.left) {
       car.rotation.y += gameState.turnSpeed * turnMultiplier;
     }
@@ -254,7 +276,11 @@ export function updateCar(car, gameState, keys) {
     }
   }
 
+  // Stop very small velocities
+  if (velocity.lengthSq() < 0.000001) {
+    velocity.set(0, 0, 0);
+  }
+
   // Move car
-  car.position.x += Math.sin(car.rotation.y) * gameState.speed;
-  car.position.z += Math.cos(car.rotation.y) * gameState.speed;
+  car.position.add(velocity);
 }

@@ -78,6 +78,33 @@
         #brakeFill {
             background: #ff4444;
         }
+        #steeringGauge {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.6);
+        }
+        #steeringGauge::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateX(-50%);
+        }
+        #steeringFill {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: #ffffff;
+            transition: width 0.05s ease-out, left 0.05s ease-out, right 0.05s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -92,6 +119,9 @@
         <div id="brakeSection">
             <div id="brakeFill"></div>
         </div>
+    </div>
+    <div id="steeringGauge">
+        <div id="steeringFill"></div>
     </div>
     <script type="module" src="js/main.js"></script>
 </body>

@@ -73,4 +73,23 @@ export const GAME_CONFIG = {
   gaugeGap: 4,
   gaugeBottomOffset: 20,
   gaugeThrottleRatio: 0.67,
+
+  // Steering gauge
+  gaugeSteeringColor: 0xffffff,
+  gaugeSteeringGap: 12,
+
+  // Physics
+  gripFactor: 0.08,
+  friction: 0.005,
+  airResistance: 0.0001,
+
+  // Debug visualization
+  debugVelocityColor: 0x0088ff,
+  debugFacingColor: 0x00ff00,
+  debugVelocityScale: 4,
+  debugFacingLength: 5,
+  debugFacingLengthMin: 1,
+  debugArrowHeight: 0,
+  debugArrowHeadLength: 0.5,
+  debugArrowHeadWidth: 0.3,
 };

@@ -5,8 +5,9 @@ import { createScene } from "./scene.js";
 import { createTrack } from "./track.js";
 import { createCar, updateCar } from "./car.js";
 import { updateCamera } from "./camera.js";
-import { setupInput } from "./input.js";
-import { createUI, updateUI, updateInputGauge } from "./ui.js";
+import { setupInput, setupDebugToggle } from "./input.js";
+import { createUI, updateUI, updateInputGauge, updateSteeringGauge } from "./ui.js";
+import { createDebugArrows, updateDebugArrows, setDebugMode } from "./debug.js";
 
 // Initialize scene, camera, and renderer
 const { scene, camera, renderer } = createScene();
@@ -23,6 +24,14 @@ scene.add(car);
 // Setup input handlers
 setupInput(keys);
 
+// Setup debug toggle
+setupDebugToggle(() => {
+  setDebugMode(!gameState.debugMode);
+});
+
+// Create debug arrows
+createDebugArrows(scene);
+
 // Create UI references
 const ui = createUI();
 
@@ -34,6 +43,8 @@ function animate() {
   updateCamera(camera, car);
   updateUI(gameState, car, ui);
   updateInputGauge(keys, ui);
+  updateSteeringGauge(keys, ui);
+  updateDebugArrows(car, keys);
 
   renderer.render(scene, camera);
 }

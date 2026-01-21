@@ -48,3 +48,12 @@ export function setupInput(keys) {
     }
   });
 }
+
+// Setup debug toggle key handler
+export function setupDebugToggle(callback) {
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "KeyH") {
+      callback();
+    }
+  });
+}
