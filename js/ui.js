@@ -63,14 +63,14 @@ export function updateUI(gameState, car, ui) {
 export function updateInputGauge(keys, ui) {
   const { throttleFill, brakeFill } = ui;
 
-  // Throttle: forward key (W or Arrow Up)
-  // For keyboard, throttle is either 0% or 100%
-  const throttleLevel = keys.forward ? 100 : 0;
+  // Throttle: forward key (W or Arrow Up) or RT (controller)
+  // Analog value 0-1, convert to percentage
+  const throttleLevel = keys.forward * 100;
   throttleFill.style.width = `${throttleLevel}%`;
 
-  // Brake: brake key (Space) or backward key (S or Arrow Down)
-  // For keyboard, brake is either 0% or 100%
-  const brakeLevel = (keys.brake || keys.backward) ? 100 : 0;
+  // Brake: brake key (Space) or RB (controller) or backward key (S or Arrow Down)
+  // Analog value 0-1, convert to percentage
+  const brakeLevel = Math.max(keys.brake, keys.backward) * 100;
   brakeFill.style.width = `${brakeLevel}%`;
 }
 
@@ -80,16 +80,16 @@ export function updateSteeringGauge(keys, ui) {
 
   // Steering fills from center line outward to the edges
   // Only one direction should be active at a time (both pressed = neutral)
-  if (keys.left && !keys.right) {
-    // Steering left: fill from center to left edge
+  if (keys.left > 0 && keys.right <= 0) {
+    // Steering left: fill from center to left edge (analog 0-1 becomes 0-50%)
     steeringFill.style.left = "auto";
     steeringFill.style.right = "50%";
-    steeringFill.style.width = "50%";
-  } else if (keys.right && !keys.left) {
-    // Steering right: fill from center to right edge
+    steeringFill.style.width = `${keys.left * 50}%`;
+  } else if (keys.right > 0 && keys.left <= 0) {
+    // Steering right: fill from center to right edge (analog 0-1 becomes 0-50%)
     steeringFill.style.left = "50%";
     steeringFill.style.right = "auto";
-    steeringFill.style.width = "50%";
+    steeringFill.style.width = `${keys.right * 50}%`;
   } else {
     // Neutral: both pressed or neither pressed
     steeringFill.style.width = "0%";

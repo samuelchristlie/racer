@@ -15,13 +15,13 @@ export const gameState = {
   debugMode: false,
 };
 
-// Input state
+// Input state (0-1 analog values for controller support)
 export const keys = {
-  forward: false,
-  backward: false,
-  left: false,
-  right: false,
-  brake: false,
+  forward: 0,
+  backward: 0,
+  left: 0,
+  right: 0,
+  brake: 0,
 };
 
 // Reset game state to initial values

@@ -223,24 +223,24 @@ export function updateCar(car, gameState, keys) {
     Math.cos(car.rotation.y),
   );
 
-  // Apply input force
-  if (keys.forward) {
-    const acceleration = facingDir.clone().multiplyScalar(gameState.acceleration);
+  // Apply input force (multiply by analog value 0-1)
+  if (keys.forward > 0) {
+    const acceleration = facingDir.clone().multiplyScalar(gameState.acceleration * keys.forward);
     velocity.add(acceleration);
-  } else if (keys.backward) {
-    const acceleration = facingDir.clone().multiplyScalar(-gameState.acceleration * 0.5);
+  } else if (keys.backward > 0) {
+    const acceleration = facingDir.clone().multiplyScalar(-gameState.acceleration * 0.5 * keys.backward);
     velocity.add(acceleration);
   }
 
   // Apply braking (force opposite to velocity)
-  if (keys.brake && velocity.lengthSq() > 0.0001) {
+  if (keys.brake > 0 && velocity.lengthSq() > 0.0001) {
     const brakeDir = velocity.clone().normalize();
-    const brakeForce = brakeDir.multiplyScalar(-gameState.brakeForce);
+    const brakeForce = brakeDir.multiplyScalar(-gameState.brakeForce * keys.brake);
     velocity.add(brakeForce);
   }
 
   // Apply friction when coasting
-  if (!keys.forward && !keys.backward && !keys.brake) {
+  if (keys.forward <= 0 && keys.backward <= 0 && keys.brake <= 0) {
     const friction = velocity.clone().multiplyScalar(-GAME_CONFIG.friction);
     velocity.add(friction);
   }
@@ -268,11 +268,11 @@ export function updateCar(car, gameState, keys) {
   // Update car rotation (only when moving)
   if (speed > 0.01) {
     const turnMultiplier = velocity.dot(facingDir) > 0 ? 1 : -1;
-    if (keys.left) {
-      car.rotation.y += gameState.turnSpeed * turnMultiplier;
+    if (keys.left > 0) {
+      car.rotation.y += gameState.turnSpeed * keys.left * turnMultiplier;
     }
-    if (keys.right) {
-      car.rotation.y -= gameState.turnSpeed * turnMultiplier;
+    if (keys.right > 0) {
+      car.rotation.y -= gameState.turnSpeed * keys.right * turnMultiplier;
     }
   }
 

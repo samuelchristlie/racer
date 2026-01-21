@@ -6,6 +6,7 @@ import { createTrack } from "./track.js";
 import { createCar, updateCar } from "./car.js";
 import { updateCamera } from "./camera.js";
 import { setupInput, setupDebugToggle } from "./input.js";
+import { pollController } from "./controller.js";
 import { createUI, updateUI, updateInputGauge, updateSteeringGauge } from "./ui.js";
 import { createDebugArrows, updateDebugArrows, setDebugMode } from "./debug.js";
 
@@ -39,6 +40,7 @@ const ui = createUI();
 function animate() {
   requestAnimationFrame(animate);
 
+  pollController(keys);
   updateCar(car, gameState, keys);
   updateCamera(camera, car);
   updateUI(gameState, car, ui);

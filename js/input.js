@@ -4,22 +4,22 @@ export function setupInput(keys) {
     switch (e.code) {
       case "KeyW":
       case "ArrowUp":
-        keys.forward = true;
+        keys.forward = 1;
         break;
       case "KeyS":
       case "ArrowDown":
-        keys.backward = true;
+        keys.backward = 1;
         break;
       case "KeyA":
       case "ArrowLeft":
-        keys.left = true;
+        keys.left = 1;
         break;
       case "KeyD":
       case "ArrowRight":
-        keys.right = true;
+        keys.right = 1;
         break;
       case "Space":
-        keys.brake = true;
+        keys.brake = 1;
         break;
     }
   });
@@ -28,22 +28,22 @@ export function setupInput(keys) {
     switch (e.code) {
       case "KeyW":
       case "ArrowUp":
-        keys.forward = false;
+        keys.forward = 0;
         break;
       case "KeyS":
       case "ArrowDown":
-        keys.backward = false;
+        keys.backward = 0;
         break;
       case "KeyA":
       case "ArrowLeft":
-        keys.left = false;
+        keys.left = 0;
         break;
       case "KeyD":
       case "ArrowRight":
-        keys.right = false;
+        keys.right = 0;
         break;
       case "Space":
-        keys.brake = false;
+        keys.brake = 0;
         break;
     }
   });

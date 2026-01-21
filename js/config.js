@@ -92,4 +92,10 @@ export const GAME_CONFIG = {
   debugArrowHeight: 0,
   debugArrowHeadLength: 0.5,
   debugArrowHeadWidth: 0.3,
+
+  // Controller
+  controllerDeadzone: 0.1,
+  controllerButtonRT: 7,
+  controllerButtonRB: 6,
+  controllerAxisLeftStickX: 0,
 };
