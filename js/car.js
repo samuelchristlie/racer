@@ -139,8 +139,8 @@ export function createCar() {
   // Front wheels (smaller)
   const frontWheelGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.35, 24);
   const frontWheelPositions = [
-    { x: -1.4, z: 1.8 },
-    { x: 1.4, z: 1.8 },
+    { x: -0.9, z: 1.8 },
+    { x: 0.9, z: 1.8 },
   ];
 
   frontWheelPositions.forEach((pos) => {

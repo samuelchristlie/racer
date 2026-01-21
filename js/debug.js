@@ -4,6 +4,7 @@ import { gameState } from "./state.js";
 
 let velocityArrow = null;
 let facingArrow = null;
+let trackGrid = null;
 let scene = null;
 
 // Create debug arrow helpers and add to scene
@@ -39,6 +40,17 @@ export function createDebugArrows(targetScene) {
   facingArrow.cone.material.depthTest = false;
   facingArrow.cone.material.renderOrder = 999;
   scene.add(facingArrow);
+
+  // Create track grid (1x1 meter squares)
+  // Grid size: covers the oval track area
+  const gridSizeX = GAME_CONFIG.trackLength + GAME_CONFIG.trackCurveRadius * 2 + 50; // ~950m
+  const gridSizeZ = GAME_CONFIG.trackCurveRadius * 2 + GAME_CONFIG.trackWidth + 50; // ~375m
+  trackGrid = new THREE.GridHelper(gridSizeX, Math.floor(gridSizeX), 0x444444, 0x333333);
+  trackGrid.position.y = 0.02; // Slightly above track
+  trackGrid.visible = false;
+  // Center the grid on the track
+  trackGrid.position.z = -25; // Offset to center on oval
+  scene.add(trackGrid);
 }
 
 // Update debug arrow positions, directions, and lengths
@@ -78,5 +90,9 @@ export function setDebugMode(enabled) {
   if (velocityArrow && facingArrow) {
     velocityArrow.visible = enabled;
     facingArrow.visible = enabled;
+  }
+
+  if (trackGrid) {
+    trackGrid.visible = enabled;
   }
 }

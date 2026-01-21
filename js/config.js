@@ -94,7 +94,7 @@ export const GAME_CONFIG = {
   shadowCameraBottom: -100,
 
   // Track (SI units - meters)
-  trackWidth: 22.5,
+  trackWidth: 12,
   trackLength: 500, // m (2.5x scale for realistic F1 speeds)
   trackCurveRadius: 150, // m (2.5x scale for high-speed cornering)
   trackColor: 0x1a1a1a, // Very dark asphalt
