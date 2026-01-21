@@ -23,7 +23,7 @@ car.position.set(0, 0, GAME_CONFIG.trackCurveRadius + GAME_CONFIG.carStartZOffse
 scene.add(car);
 
 // Setup input handlers
-setupInput(keys);
+setupInput(keys, gameState);
 
 // Setup debug toggle
 setupDebugToggle(() => {
@@ -40,13 +40,13 @@ const ui = createUI();
 function animate() {
   requestAnimationFrame(animate);
 
-  pollController(keys);
-  updateCar(car, gameState, keys);
-  updateCamera(camera, car);
+  pollController(keys, gameState);
+  const physics = updateCar(car, gameState, keys);
+  updateCamera(camera, car, gameState);
   updateUI(gameState, car, ui);
   updateInputGauge(keys, ui);
   updateSteeringGauge(keys, ui);
-  updateDebugArrows(car, keys);
+  updateDebugArrows(car, physics, keys);
 
   renderer.render(scene, camera);
 }

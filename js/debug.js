@@ -42,36 +42,32 @@ export function createDebugArrows(targetScene) {
 }
 
 // Update debug arrow positions, directions, and lengths
-export function updateDebugArrows(car, keys) {
+export function updateDebugArrows(car, physics, keys) {
   if (!gameState.debugMode) return;
 
   const carPos = car.position.clone();
   carPos.y = GAME_CONFIG.debugArrowHeight;
 
   // Update velocity arrow (blue) - shows where car is actually going
-  const { velocity } = gameState;
-  if (velocity.lengthSq() > 0.0001) {
-    const velDir = velocity.clone().normalize();
-    const velLength = velocity.length() * GAME_CONFIG.debugVelocityScale;
-    velocityArrow.position.copy(carPos);
-    velocityArrow.setDirection(velDir);
-    // Keep head size constant
-    velocityArrow.setLength(velLength, GAME_CONFIG.debugArrowHeadLength, GAME_CONFIG.debugArrowHeadWidth);
-  }
+  // Arrow is always visible (length 0 when stopped)
+  const velDir = physics.velocity.clone().normalize();
+  const velLength = Math.max(0, physics.speed * GAME_CONFIG.debugVelocityScale);
+  velocityArrow.position.copy(carPos);
+  velocityArrow.setDirection(velDir);
+  // Keep head size constant, shaft length may be 0
+  velocityArrow.setLength(velLength, GAME_CONFIG.debugArrowHeadLength, GAME_CONFIG.debugArrowHeadWidth);
 
   // Update facing/throttle arrow (green) - fixed to car, shows throttle input level
-  const facingDir = new THREE.Vector3(
-    Math.sin(car.rotation.y),
-    0,
-    Math.cos(car.rotation.y),
-  );
+  // Arrow is always visible (length 0 when stopped, longer with throttle when moving)
   facingArrow.position.copy(carPos);
-  facingArrow.setDirection(facingDir);
+  facingArrow.setDirection(physics.facingDirection);
 
   // Scale arrow shaft based on throttle input (head stays constant)
-  const throttleLevel = keys.forward ? 1 : 0;
-  const arrowLength = GAME_CONFIG.debugFacingLengthMin +
-    (GAME_CONFIG.debugFacingLength - GAME_CONFIG.debugFacingLengthMin) * throttleLevel;
+  // When stopped, show length 0. When moving, show length based on throttle.
+  const arrowLength = physics.isMoving
+    ? (GAME_CONFIG.debugFacingLengthMin +
+       (GAME_CONFIG.debugFacingLength - GAME_CONFIG.debugFacingLengthMin) * keys.forward)
+    : 0;
   facingArrow.setLength(arrowLength, GAME_CONFIG.debugArrowHeadLength, GAME_CONFIG.debugArrowHeadWidth);
 }
 

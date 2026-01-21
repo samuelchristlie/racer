@@ -212,6 +212,31 @@ export function createCar() {
   return car;
 }
 
+// Calculate car physics state (separated from state mutation for reuse)
+function calculateCarPhysics(car, keys, gameState) {
+  const { velocity } = gameState;
+
+  // Calculate car's facing direction
+  const facingDir = new THREE.Vector3(
+    Math.sin(car.rotation.y),
+    0,
+    Math.cos(car.rotation.y),
+  );
+
+  // Clone velocity for calculation (don't modify state yet)
+  const calculatedVelocity = velocity.clone();
+  const speed = calculatedVelocity.length();
+  const isMoving = speed > 0.0001;
+
+  // Return physics state object
+  return {
+    velocity: calculatedVelocity,
+    speed: speed,
+    facingDirection: facingDir,
+    isMoving: isMoving,
+  };
+}
+
 // Update car physics and state
 export function updateCar(car, gameState, keys) {
   const { velocity } = gameState;
@@ -283,4 +308,7 @@ export function updateCar(car, gameState, keys) {
 
   // Move car
   car.position.add(velocity);
+
+  // Return physics state for debug visualization
+  return calculateCarPhysics(car, keys, gameState);
 }

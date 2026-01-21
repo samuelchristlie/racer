@@ -1,25 +1,37 @@
 // Setup keyboard input handlers
-export function setupInput(keys) {
+export function setupInput(keys, gameState) {
   document.addEventListener("keydown", (e) => {
     switch (e.code) {
       case "KeyW":
-      case "ArrowUp":
         keys.forward = 1;
         break;
       case "KeyS":
-      case "ArrowDown":
         keys.backward = 1;
         break;
       case "KeyA":
-      case "ArrowLeft":
         keys.left = 1;
         break;
       case "KeyD":
-      case "ArrowRight":
         keys.right = 1;
         break;
       case "Space":
         keys.brake = 1;
+        break;
+      case "ArrowUp":
+        gameState.cameraRotation = 0;
+        gameState.cameraInputActive = true;
+        break;
+      case "ArrowDown":
+        gameState.cameraRotation = Math.PI;
+        gameState.cameraInputActive = true;
+        break;
+      case "ArrowLeft":
+        gameState.cameraRotation = Math.PI / 2;
+        gameState.cameraInputActive = true;
+        break;
+      case "ArrowRight":
+        gameState.cameraRotation = -Math.PI / 2;
+        gameState.cameraInputActive = true;
         break;
     }
   });
@@ -27,23 +39,25 @@ export function setupInput(keys) {
   document.addEventListener("keyup", (e) => {
     switch (e.code) {
       case "KeyW":
-      case "ArrowUp":
         keys.forward = 0;
         break;
       case "KeyS":
-      case "ArrowDown":
         keys.backward = 0;
         break;
       case "KeyA":
-      case "ArrowLeft":
         keys.left = 0;
         break;
       case "KeyD":
-      case "ArrowRight":
         keys.right = 0;
         break;
       case "Space":
         keys.brake = 0;
+        break;
+      case "ArrowUp":
+      case "ArrowDown":
+      case "ArrowLeft":
+      case "ArrowRight":
+        gameState.cameraInputActive = false;
         break;
     }
   });

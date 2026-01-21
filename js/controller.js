@@ -1,7 +1,7 @@
 import { GAME_CONFIG } from "./config.js";
 
 // Poll controller input and update keys object
-export function pollController(keys) {
+export function pollController(keys, gameState) {
   const gamepads = navigator.getGamepads();
 
   // Find first connected gamepad
@@ -10,8 +10,14 @@ export function pollController(keys) {
     return; // No controller connected
   }
 
-  const { controllerDeadzone, controllerButtonRT, controllerButtonRB, controllerAxisLeftStickX } =
-    GAME_CONFIG;
+  const {
+    controllerDeadzone,
+    controllerButtonRT,
+    controllerButtonRB,
+    controllerAxisLeftStickX,
+    controllerAxisRightStickX,
+    controllerAxisRightStickY,
+  } = GAME_CONFIG;
 
   // RT (button 7) for throttle - analog trigger returns 0-1 value
   const rtValue = gamepad.buttons[controllerButtonRT]?.value ?? 0;
@@ -44,5 +50,20 @@ export function pollController(keys) {
     // In deadzone - clear both steering directions
     keys.left = 0;
     keys.right = 0;
+  }
+
+  // Right joystick for camera rotation (2D input)
+  const rightStickX = gamepad.axes[controllerAxisRightStickX] ?? 0;
+  const rightStickY = gamepad.axes[controllerAxisRightStickY] ?? 0;
+
+  // Check if right stick is outside deadzone
+  const rightStickMagnitude = Math.sqrt(rightStickX * rightStickX + rightStickY * rightStickY);
+  if (rightStickMagnitude > controllerDeadzone) {
+    // Calculate angle from joystick position (in radians)
+    // -axisY because down is negative in gamepad API
+    gameState.cameraRotation = Math.atan2(-rightStickY, rightStickX);
+    gameState.cameraInputActive = true;
+  } else {
+    gameState.cameraInputActive = false;
   }
 }

@@ -13,6 +13,8 @@ export const gameState = {
   totalLaps: GAME_CONFIG.totalLaps,
   checkpoint: 0,
   debugMode: false,
+  cameraRotation: 0,
+  cameraInputActive: false,
 };
 
 // Input state (0-1 analog values for controller support)

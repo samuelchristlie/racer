@@ -79,7 +79,7 @@ export const GAME_CONFIG = {
   gaugeSteeringGap: 12,
 
   // Physics
-  gripFactor: 0.08,
+  gripFactor: 0.06,
   friction: 0.005,
   airResistance: 0.0001,
 
@@ -98,4 +98,10 @@ export const GAME_CONFIG = {
   controllerButtonRT: 7,
   controllerButtonRB: 6,
   controllerAxisLeftStickX: 0,
+  controllerAxisRightStickX: 2,
+  controllerAxisRightStickY: 3,
+
+  // Camera rotation
+  cameraReturnSpeed: 0.95,
+  cameraRotationMinThreshold: 0.001,
 };
